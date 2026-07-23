@@ -15,9 +15,15 @@
 
 <header>
 
-    💬 Message Me
+    <h1>💬 Message Me</h1>
 
-    <button onclick="mode()">🌙</button>
+    <div class="header-buttons">
+
+        <button onclick="mode()">🌙</button>
+
+        <button onclick="openSettings()">⚙️</button>
+
+    </div>
 
 </header>
 
@@ -132,4 +138,31 @@
 
 </body>
 
+</div>
+
+<!-- SETTINGS PANEL -->
+<div id="settingsPanel" class="settings-panel">
+
+    <div class="settings-header">
+        <h2>⚙️ Settings</h2>
+        <button onclick="closeSettings()">✖</button>
+    </div>
+
+    <h3>Account</h3>
+
+    <button>👤 Change Display Name</button>
+    <button>🖼️ Change Profile Picture</button>
+    <button>📝 Change Username</button>
+    <button>📧 Change Email</button>
+    <button>🔑 Change Password</button>
+
+    <button class="delete-btn">🗑 Delete Account</button>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="script.js"></script>
+
+</body>
 </html>
