@@ -6,16 +6,22 @@ let currentChat = "";
 // LOAD USER
 // =========================
 
-async function loadUser() {
+async function loadUser(){
 
-    const { data, error } = await supabaseClient.auth.getUser();
+    const { data, error } =
+        await supabaseClient.auth.getUser();
 
-    if (error || !data.user) {
+
+    if(error || !data.user){
+
         window.location.href = "index.html";
         return;
+
     }
 
+
     currentUser = data.user;
+
 
     loadFriends();
     listenForMessages();
@@ -23,22 +29,20 @@ async function loadUser() {
 }
 
 
-// =========================
-// START APP
-// =========================
-
 loadUser();
 
 
 
 // =========================
-// ENTER KEY SEND
+// ENTER SEND
 // =========================
 
-function enterSend(event) {
+function enterSend(event){
 
-    if (event.key === "Enter") {
+    if(event.key === "Enter"){
+
         sendMessage();
+
     }
 
 }
@@ -49,10 +53,10 @@ function enterSend(event) {
 // SEND MESSAGE
 // =========================
 
-async function sendMessage() {
+async function sendMessage(){
 
 
-    if (currentChat === "") {
+    if(currentChat === ""){
 
         alert("Choose a friend first 💙");
         return;
@@ -60,18 +64,25 @@ async function sendMessage() {
     }
 
 
-    const input = document.getElementById("messageInput");
+    const input =
+        document.getElementById("messageInput");
 
-    const text = input.value.trim();
+
+    const text =
+        input.value.trim();
 
 
-    if (text === "") {
+
+    if(text === ""){
+
         return;
+
     }
 
 
 
-    const { error } = await supabaseClient
+    const { error } =
+        await supabaseClient
         .from("messages")
         .insert({
 
@@ -83,7 +94,7 @@ async function sendMessage() {
 
 
 
-    if (error) {
+    if(error){
 
         alert(error.message);
         return;
@@ -91,11 +102,7 @@ async function sendMessage() {
     }
 
 
-
     input.value = "";
-
-    loadMessages();
-
 
 }
 
@@ -105,14 +112,20 @@ async function sendMessage() {
 // OPEN CHAT
 // =========================
 
-function openChat(id, name) {
+function openChat(id,name){
 
 
     currentChat = id;
 
 
+
     document.getElementById("chatName").innerHTML =
-        "Chat with " + name;
+        name;
+
+
+
+    document.getElementById("chatAvatar").src =
+        "https://api.dicebear.com/9.x/initials/svg?seed=" + name;
 
 
 
@@ -124,31 +137,32 @@ function openChat(id, name) {
 
 
 // =========================
-// LOAD MESSAGES
+// LOAD OLD MESSAGES
 // =========================
 
-async function loadMessages() {
+async function loadMessages(){
 
 
-    if (currentChat === "") {
+    if(currentChat === ""){
+
         return;
+
     }
 
 
 
-    const { data, error } = await supabaseClient
+    const {data,error} =
+        await supabaseClient
         .from("messages")
         .select("*")
         .or(
-            `and(sender.eq.${currentUser.id},receiver.eq.${currentChat}),and(sender.eq.${currentChat},receiver.eq.${currentUser.id})`
+        `and(sender.eq.${currentUser.id},receiver.eq.${currentChat}),and(sender.eq.${currentChat},receiver.eq.${currentUser.id})`
         )
-        .order("created_at", {
-            ascending: true
-        });
+        .order("created_at",{ascending:true});
 
 
 
-    if (error) {
+    if(error){
 
         console.log(error);
         return;
@@ -157,104 +171,126 @@ async function loadMessages() {
 
 
 
-    const box = document.getElementById("messages");
+    const box =
+        document.getElementById("messages");
+
 
     box.innerHTML = "";
 
 
 
-    for (const msg of data) {
+    for(const msg of data){
 
-
-        const message = document.createElement("div");
-
-
-
-        if (msg.sender === currentUser.id) {
-
-            message.className =
-                "message my-message";
-
-        } 
-        
-        else {
-
-            message.className =
-                "message";
-
-        }
-
-
-
-        let senderName = "Friend";
-
-
-
-        if (msg.sender === currentUser.id) {
-
-            senderName = "You";
-
-        }
-
-        else {
-
-
-            const { data: profile } = await supabaseClient
-                .from("profiles")
-                .select("display_name")
-                .eq("id", msg.sender)
-                .single();
-
-
-
-            if (profile) {
-
-                senderName =
-                    profile.display_name;
-
-            }
-
-        }
-
-
-
-        const time =
-            new Date(msg.created_at)
-            .toLocaleTimeString([], {
-
-                hour: "2-digit",
-                minute: "2-digit"
-
-            });
-
-
-
-        message.innerHTML = `
-
-            <div class="message-name">
-                ${senderName}
-            </div>
-
-            <div>
-                ${msg.message}
-            </div>
-
-            <small>
-                ${time}
-            </small>
-
-        `;
-
-
-
-        box.appendChild(message);
-
+        await createMessage(msg);
 
     }
 
 
 
-    box.scrollTop = box.scrollHeight;
+    box.scrollTop =
+        box.scrollHeight;
+
+
+}
+
+
+
+
+// =========================
+// CREATE MESSAGE BUBBLE
+// =========================
+
+async function createMessage(msg){
+
+
+    const box =
+        document.getElementById("messages");
+
+
+
+    const message =
+        document.createElement("div");
+
+
+
+    if(msg.sender === currentUser.id){
+
+        message.className =
+            "message my-message";
+
+    }
+
+    else{
+
+        message.className =
+            "message";
+
+    }
+
+
+
+    let name = "Friend";
+
+
+
+    if(msg.sender === currentUser.id){
+
+        name = "You";
+
+    }
+
+    else{
+
+
+        const {data:profile} =
+            await supabaseClient
+            .from("profiles")
+            .select("display_name")
+            .eq("id",msg.sender)
+            .single();
+
+
+
+        if(profile){
+
+            name = profile.display_name;
+
+        }
+
+    }
+
+
+
+    const time =
+        new Date(msg.created_at)
+        .toLocaleTimeString([],{
+
+            hour:"2-digit",
+            minute:"2-digit"
+
+        });
+
+
+
+    message.innerHTML = `
+
+        <div class="message-name">
+            ${name}
+        </div>
+
+        <div>
+            ${msg.message}
+        </div>
+
+        <small>
+            ${time}
+        </small>
+
+    `;
+
+
+
+    box.appendChild(message);
 
 
 }
@@ -266,17 +302,18 @@ async function loadMessages() {
 // LOAD FRIENDS
 // =========================
 
-async function loadFriends() {
+async function loadFriends(){
 
 
-    const { data, error } = await supabaseClient
+    const {data,error} =
+        await supabaseClient
         .from("profiles")
         .select("*")
-        .neq("id", currentUser.id);
+        .neq("id",currentUser.id);
 
 
 
-    if (error) {
+    if(error){
 
         console.log(error);
         return;
@@ -294,13 +331,11 @@ async function loadFriends() {
 
 
 
-    data.forEach(friend => {
-
+    data.forEach(friend=>{
 
 
         const div =
             document.createElement("div");
-
 
 
         div.className =
@@ -310,19 +345,20 @@ async function loadFriends() {
 
         div.innerHTML = `
 
-            <img
-            src="https://api.dicebear.com/9.x/initials/svg?seed=${friend.display_name}"
-            class="avatar">
+        <img
+        src="https://api.dicebear.com/9.x/initials/svg?seed=${friend.display_name}"
+        class="avatar">
 
-            <span>
-                ${friend.display_name}
-            </span>
+
+        <span>
+        ${friend.display_name}
+        </span>
 
         `;
 
 
 
-        div.onclick = function() {
+        div.onclick = ()=>{
 
             openChat(
                 friend.id,
@@ -349,7 +385,7 @@ async function loadFriends() {
 // SEARCH FRIENDS
 // =========================
 
-function searchFriends() {
+function searchFriends(){
 
 
     const search =
@@ -364,22 +400,22 @@ function searchFriends() {
 
 
 
-    for (let friend of friends) {
+    for(let friend of friends){
 
 
-        if (
+        if(
             friend.innerText
             .toLowerCase()
             .includes(search)
-        ) {
+        ){
 
-            friend.style.display = "flex";
+            friend.style.display="flex";
 
         }
 
-        else {
+        else{
 
-            friend.style.display = "none";
+            friend.style.display="none";
 
         }
 
@@ -395,7 +431,7 @@ function searchFriends() {
 // DARK MODE
 // =========================
 
-function mode() {
+function mode(){
 
     document.body.classList.toggle("light");
 
@@ -404,28 +440,29 @@ function mode() {
 
 
 // =========================
-// REAL TIME MESSAGES
+// REALTIME
 // =========================
 
-function listenForMessages() {
+function listenForMessages(){
 
 
     supabaseClient
     .channel("messages")
+
     .on(
 
         "postgres_changes",
 
         {
 
-            event: "INSERT",
-            schema: "public",
-            table: "messages"
+            event:"INSERT",
+            schema:"public",
+            table:"messages"
 
         },
 
 
-        payload => {
+        async payload=>{
 
 
             const msg =
@@ -433,7 +470,7 @@ function listenForMessages() {
 
 
 
-            if (
+            if(
 
                 (msg.sender === currentUser.id &&
                 msg.receiver === currentChat)
@@ -443,9 +480,19 @@ function listenForMessages() {
                 (msg.sender === currentChat &&
                 msg.receiver === currentUser.id)
 
-            ) {
+            ){
 
-                loadMessages();
+
+                await createMessage(msg);
+
+
+                const box =
+                    document.getElementById("messages");
+
+
+                box.scrollTop =
+                    box.scrollHeight;
+
 
             }
 
@@ -456,5 +503,241 @@ function listenForMessages() {
 
     .subscribe();
 
+
+}
+
+// =========================
+// CHANGE DISPLAY NAME
+// =========================
+
+async function saveDisplayName(){
+
+
+    const name =
+        document.getElementById("displayNameInput")
+        .value
+        .trim();
+
+
+
+    if(name === ""){
+
+        alert("Enter a name first 💙");
+        return;
+
+    }
+
+
+
+    const {error} =
+        await supabaseClient
+        .from("profiles")
+        .update({
+
+            display_name:name
+
+        })
+        .eq(
+            "id",
+            currentUser.id
+        );
+
+
+
+    if(error){
+
+        alert(error.message);
+        return;
+
+    }
+
+
+
+    alert("Display name updated! 🎉");
+
+
+}
+// =========================
+// SETTINGS - LOAD USER INFO
+// =========================
+
+async function loadSettings(){
+
+    const { data, error } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("id", currentUser.id)
+        .single();
+
+
+    if(error){
+
+        console.log(error);
+        return;
+
+    }
+
+
+    document.getElementById("displayNameInput").value =
+        data.display_name || "";
+
+
+    document.getElementById("usernameInput").value =
+        data.username || "";
+
+
+    document.getElementById("emailInput").value =
+        currentUser.email || "";
+
+}
+
+
+
+// =========================
+// SAVE DISPLAY NAME
+// =========================
+
+async function saveDisplayName(){
+
+
+    let name =
+        document.getElementById("displayNameInput")
+        .value
+        .trim();
+
+
+    if(name === ""){
+
+        alert("Please enter a display name 💙");
+        return;
+
+    }
+
+
+
+    const { error } =
+        await supabaseClient
+        .from("profiles")
+        .update({
+
+            display_name:name
+
+        })
+        .eq(
+            "id",
+            currentUser.id
+        );
+
+
+
+    if(error){
+
+        alert(error.message);
+        return;
+
+    }
+
+
+    alert("Display name changed 🎉");
+
+}
+
+
+
+
+// =========================
+// SAVE USERNAME
+// =========================
+
+async function saveUsername(){
+
+
+    let username =
+        document.getElementById("usernameInput")
+        .value
+        .trim();
+
+
+
+    if(username === ""){
+
+        alert("Please enter a username 💙");
+        return;
+
+    }
+
+
+
+    const { error } =
+        await supabaseClient
+        .from("profiles")
+        .update({
+
+            username:username
+
+        })
+        .eq(
+            "id",
+            currentUser.id
+        );
+
+
+
+    if(error){
+
+        alert(error.message);
+        return;
+
+    }
+
+
+    alert("Username changed 🎉");
+
+}
+
+
+
+
+// =========================
+// SAVE EMAIL
+// =========================
+
+async function saveEmail(){
+
+
+    let email =
+        document.getElementById("emailInput")
+        .value
+        .trim();
+
+
+
+    if(email === ""){
+
+        alert("Please enter an email 💙");
+        return;
+
+    }
+
+
+
+    const { error } =
+        await supabaseClient.auth.updateUser({
+
+            email:email
+
+        });
+
+
+
+    if(error){
+
+        alert(error.message);
+        return;
+
+    }
+
+
+    alert("Check your email to confirm the change 📧");
 
 }

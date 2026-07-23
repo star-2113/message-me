@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Settings - Message Me</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+
+<header class="settings-header">
+
+    <h1>
+        ⚙️ Settings
+    </h1>
+
+
+    <button class="home-button"
+    onclick="window.location.href='chat.html'">
+
+        🏠 Home
+
+    </button>
+
+</header>
+
+
+
+
+
+<div class="settings-container">
+
+
+
+    <!-- ACCOUNT -->
+
+    <div class="settings-card">
+
+
+        <h2>👤 Account</h2>
+
+
+
+        <label>
+            Display Name
+        </label>
+
+
+        <input
+        id="displayNameInput"
+        placeholder="Display name">
+
+
+
+        <button onclick="saveDisplayName()">
+            Save Display Name
+        </button>
+
+
+
+        <br><br>
+
+
+
+        <label>
+            Username
+        </label>
+
+
+        <input
+        id="usernameInput"
+        placeholder="Username">
+
+
+
+        <button onclick="saveUsername()">
+            Save Username
+        </button>
+
+
+
+        <br><br>
+
+
+
+        <label>
+            Email
+        </label>
+
+
+        <input
+        id="emailInput"
+        placeholder="Email">
+
+
+
+        <button onclick="saveEmail()">
+            Save Email
+        </button>
+
+
+
+    </div>
+
+
+
+
+
+
+    <!-- APPEARANCE -->
+
+    <div class="settings-card">
+
+
+        <h2>🎨 Appearance</h2>
+
+
+
+        <div class="setting-option"
+        onclick="mode()">
+
+
+            🌙 Toggle Dark Mode
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+
+
+    <!-- NOTIFICATIONS -->
+
+    <div class="settings-card">
+
+
+        <h2>🔔 Notifications</h2>
+
+
+
+        <div class="setting-option">
+
+
+            💬 Message Notifications
+
+
+        </div>
+
+
+
+
+        <div class="setting-option">
+
+
+            👥 Friend Request Notifications
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+    <!-- SECURITY -->
+
+    <div class="settings-card">
+
+
+        <h2>🔒 Security</h2>
+
+
+
+        <div class="setting-option">
+
+
+            🔑 Change Password
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+    <!-- DANGER -->
+
+    <div class="settings-card">
+
+
+        <h2>⚠️ Danger Zone</h2>
+
+
+
+        <button class="delete-btn">
+
+
+            🗑 Delete Account
+
+
+        </button>
+
+
+
+    </div>
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+<script src="script.js"></script>
+
+
+<script>
+
+window.onload = function(){
+
+    loadSettings();
+
+};
+
+</script>
+
+
+
+
+</body>
+
+</html>

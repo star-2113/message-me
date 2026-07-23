@@ -15,15 +15,9 @@
 
 <header>
 
-    <h1>💬 Message Me</h1>
-
-    <div class="header-buttons">
-
-        <button onclick="mode()">🌙</button>
-
-        <button onclick="openSettings()">⚙️</button>
-
-    </div>
+    <h1 id="chatTitle">
+        💬 Message Me
+    </h1>
 
 </header>
 
@@ -48,7 +42,7 @@
 
         <div id="friendsList">
 
-            <!-- Friends load here from Supabase -->
+            <!-- Friends appear here -->
 
         </div>
 
@@ -80,21 +74,96 @@
         </div>
 
 
+
+
+
+        <!-- BOTTOM BUTTONS -->
+
+        <div class="sidebar-bottom">
+
+
+            <div class="bottom-button" onclick="mode()">
+
+                🌙 Theme
+
+            </div>
+
+
+
+            <div class="bottom-button"
+            onclick="window.location.href='settings.html'">
+
+                ⚙️ Settings
+
+            </div>
+
+
+
+        </div>
+
+
+
     </div>
 
 
 
 
 
+
     <!-- CHAT AREA -->
+
     <div class="chat">
 
 
-        <h2 id="chatName">
-            Select a friend 💙
-        </h2>
+
+        <!-- CHAT HEADER -->
+
+        <div class="chat-header">
 
 
+            <div class="chat-user">
+
+
+                <img
+                id="chatAvatar"
+                src="https://api.dicebear.com/9.x/initials/svg?seed=User"
+                class="chat-avatar">
+
+
+
+                <div>
+
+                    <h2 id="chatName">
+                        Select a friend 💙
+                    </h2>
+
+
+                    <small>
+                        Online
+                    </small>
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+            <div class="online-dot"></div>
+
+
+
+        </div>
+
+
+
+
+
+
+
+        <!-- MESSAGES -->
 
         <div id="messages">
 
@@ -105,60 +174,43 @@
 
 
 
+
+
+        <!-- MESSAGE INPUT -->
+
         <div class="input-area">
 
 
             <input
-                id="messageInput"
-                placeholder="Type a message..."
-                onkeydown="enterSend(event)">
+            id="messageInput"
+            placeholder="Type a message..."
+            onkeydown="enterSend(event)">
 
 
 
             <button onclick="sendMessage()">
+
                 Send
+
             </button>
+
 
 
         </div>
 
 
+
+
     </div>
 
 
 
-</div>
-<!-- IMPORTANT: ORDER MATTERS -->
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script src="supabase.js"></script>
-
-<script src="script.js"></script>
-
-</body>
 
 </div>
 
-<!-- SETTINGS PANEL -->
-<div id="settingsPanel" class="settings-panel">
 
-    <div class="settings-header">
-        <h2>⚙️ Settings</h2>
-        <button onclick="closeSettings()">✖</button>
-    </div>
 
-    <h3>Account</h3>
 
-    <button>👤 Change Display Name</button>
-    <button>🖼️ Change Profile Picture</button>
-    <button>📝 Change Username</button>
-    <button>📧 Change Email</button>
-    <button>🔑 Change Password</button>
-
-    <button class="delete-btn">🗑 Delete Account</button>
-
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
