@@ -1,68 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Message Me</title>
-
-<link rel="stylesheet" href="style.css">
-
+    <title>Message Me - Login</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<header>
-💬 Message Me
-<button onclick="mode()">🌙</button>
-</header>
+<div class="login-box">
 
-<div class="container">
+<h1>💬 Message Me</h1>
 
-    <div class="sidebar">
+<input type="email" id="email" placeholder="Email">
 
-        <input
-            id="searchFriends"
-            placeholder="🔍 Search friends..."
-            onkeyup="searchFriends()">
+<input type="password" id="password" placeholder="Password">
 
-        <h2>Friends</h2>
+<button onclick="login()">Log In</button>
 
-        <div class="friend" onclick="openChat('Aroush')">
-            <img src="https://api.dicebear.com/9.x/initials/svg?seed=Aroush" class="avatar">
-            <span>🟢 Aroush</span>
-        </div>
-
-        <div class="friend" onclick="openChat('Saavi')">
-            <img src="https://api.dicebear.com/9.x/initials/svg?seed=Saavi" class="avatar">
-            <span>🟢 Saavi</span>
-        </div>
-
-        <div class="friend" onclick="openChat('Reshma')">
-            <img src="https://api.dicebear.com/9.x/initials/svg?seed=Reshma" class="avatar">
-            <span>⚪ Reshma</span>
-        </div>
-
-        <h2>Groups</h2>
-
-        <div class="friend" onclick="openChat('Study Group')">📚 Study Group</div>
-        <div class="friend" onclick="openChat('Gaming')">🎮 Gaming</div>
-
-    </div>
-
-    <div class="chat">
-
-        <h2 id="chatName">Chat</h2>
-
-        <div id="messages"></div>
-
-        <div class="input-area">
-            <input id="messageInput" placeholder="Type a message..." onkeydown="enterSend(event)">
-            <button onclick="sendMessage()">Send</button>
-        </div>
-
-    </div>
+<p>
+Don't have an account?
+<a href="signup.html">Create one</a>
+</p>
 
 </div>
 
-<script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="auth.js"></script>
 
 </body>
 </html>
