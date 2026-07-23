@@ -1,57 +1,135 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>Message Me</title>
 
-<link rel="stylesheet" href="style.css">
+<head>
+
+    <title>Message Me</title>
+
+    <link rel="stylesheet" href="style.css">
 
 </head>
 
+
 <body>
 
+
 <header>
-💬 Message Me
-<button onclick="mode()">🌙</button>
+
+    💬 Message Me
+
+    <button onclick="mode()">🌙</button>
+
 </header>
+
+
 
 <div class="container">
 
+
+    <!-- SIDEBAR -->
     <div class="sidebar">
+
 
         <input
             id="searchFriends"
             placeholder="🔍 Search friends..."
             onkeyup="searchFriends()">
 
+
+
         <h2>Friends</h2>
 
-        <<div id="friendsList"></div>
 
-        <h2>Groups</h2>
+        <div id="friendsList">
 
-        <div class="friend" onclick="openChat('Study Group')">📚 Study Group</div>
-        <div class="friend" onclick="openChat('Gaming')">🎮 Gaming</div>
+            <!-- Friends load here from Supabase -->
 
-    </div>
-
-    <div class="chat">
-
-        <h2 id="chatName">Chat</h2>
-
-        <div id="messages"></div>
-
-        <div class="input-area">
-            <input id="messageInput" placeholder="Type a message..." onkeydown="enterSend(event)">
-            <button onclick="sendMessage()">Send</button>
         </div>
 
+
+
+        <hr>
+
+
+
+        <h2>Add Friends</h2>
+
+
+        <input
+            id="userSearch"
+            placeholder="Search username...">
+
+
+
+        <button onclick="searchUsers()">
+            Search
+        </button>
+
+
+
+        <div id="searchResults">
+
+            <!-- Search results appear here -->
+
+        </div>
+
+
     </div>
 
+
+
+
+
+    <!-- CHAT AREA -->
+    <div class="chat">
+
+
+        <h2 id="chatName">
+            Select a friend 💙
+        </h2>
+
+
+
+        <div id="messages">
+
+            <!-- Messages appear here -->
+
+        </div>
+
+
+
+
+        <div class="input-area">
+
+
+            <input
+                id="messageInput"
+                placeholder="Type a message..."
+                onkeydown="enterSend(event)">
+
+
+
+            <button onclick="sendMessage()">
+                Send
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+
+
 </div>
+<!-- IMPORTANT: ORDER MATTERS -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script src="supabase.js"></script>
+
 <script src="script.js"></script>
 
 </body>
+
 </html>
