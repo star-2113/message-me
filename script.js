@@ -882,3 +882,32 @@ async function uploadAvatar(){
     alert("Done 🎉");
 
 }
+
+// =========================
+// LOAD NOTIFICATIONS
+// =========================
+
+async function loadNotifications(){
+
+    console.log("Loading notifications...");
+
+    const { data, error } =
+    await supabaseClient
+    .from("notifications")
+    .select("*")
+    .eq("user_id", currentUser.id)
+    .eq("read", false);
+
+
+    if(error){
+
+        console.log("Notification error:", error);
+        return;
+
+    }
+
+
+    console.log("Notifications:", data);
+
+
+}
