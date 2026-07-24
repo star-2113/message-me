@@ -6,11 +6,14 @@ let currentChat = "";
 // LOAD USER
 // =========================
 
+// =========================
+// LOAD USER
+// =========================
+
 async function loadUser(){
 
     const { data, error } =
         await supabaseClient.auth.getUser();
-
 
     if(error || !data.user){
 
@@ -19,19 +22,19 @@ async function loadUser(){
 
     }
 
-
     currentUser = data.user;
 
+    // Only run these on chat.html
+    if(document.getElementById("friendsList")){
 
-    loadFriends();
-    listenForMessages();
+        loadFriends();
+        listenForMessages();
+
+    }
 
 }
 
-
 loadUser();
-
-
 
 // =========================
 // ENTER SEND
@@ -304,14 +307,21 @@ async function createMessage(msg){
 
 async function loadFriends(){
 
+    const list =
+        document.getElementById("friendsList");
 
-    const {data,error} =
+    // Stop if we're not on chat.html
+    if(!list){
+
+        return;
+
+    }
+
+    const { data, error } =
         await supabaseClient
         .from("profiles")
         .select("*")
-        .neq("id",currentUser.id);
-
-
+        .neq("id", currentUser.id);
 
     if(error){
 
@@ -320,45 +330,26 @@ async function loadFriends(){
 
     }
 
-
-
-    const list =
-        document.getElementById("friendsList");
-
-
-
     list.innerHTML = "";
 
-
-
-    data.forEach(friend=>{
-
+    data.forEach(friend => {
 
         const div =
             document.createElement("div");
 
-
-        div.className =
-            "friend";
-
-
+        div.className = "friend";
 
         div.innerHTML = `
 
-        <img
-        src="https://api.dicebear.com/9.x/initials/svg?seed=${friend.display_name}"
-        class="avatar">
+            <img
+            src="https://api.dicebear.com/9.x/initials/svg?seed=${friend.display_name}"
+            class="avatar">
 
-
-        <span>
-        ${friend.display_name}
-        </span>
+            <span>${friend.display_name}</span>
 
         `;
 
-
-
-        div.onclick = ()=>{
+        div.onclick = () => {
 
             openChat(
                 friend.id,
@@ -367,14 +358,9 @@ async function loadFriends(){
 
         };
 
-
-
         list.appendChild(div);
 
-
-
     });
-
 
 }
 
@@ -443,31 +429,38 @@ function mode(){
 // REALTIME
 // =========================
 
+let messageChannel = null;
+
 function listenForMessages(){
 
+    // Stop duplicate channels
+    if(messageChannel){
 
-    supabaseClient
-    .channel("messages")
+        return;
 
+    }
+
+
+    messageChannel =
+        supabaseClient
+        .channel("messages");
+
+
+    messageChannel
     .on(
 
         "postgres_changes",
 
         {
-
             event:"INSERT",
             schema:"public",
             table:"messages"
-
         },
-
 
         async payload=>{
 
 
-            const msg =
-                payload.new;
-
+            const msg = payload.new;
 
 
             if(
@@ -490,9 +483,12 @@ function listenForMessages(){
                     document.getElementById("messages");
 
 
-                box.scrollTop =
-                    box.scrollHeight;
+                if(box){
 
+                    box.scrollTop =
+                        box.scrollHeight;
+
+                }
 
             }
 
@@ -503,44 +499,65 @@ function listenForMessages(){
 
     .subscribe();
 
-
 }
 
+
+
 // =========================
-// CHANGE DISPLAY NAME
+// SAVE PROFILE DEBUG
 // =========================
 
-async function saveDisplayName(){
+async function saveProfile(){
 
-
-    const name =
+    const displayName =
         document.getElementById("displayNameInput")
         .value
         .trim();
 
 
-
-    if(name === ""){
-
-        alert("Enter a name first 💙");
-        return;
-
-    }
+    const username =
+        document.getElementById("usernameInput")
+        .value
+        .trim();
 
 
+    const bio =
+        document.getElementById("bioInput")
+        .value
+        .trim();
 
-    const {error} =
+
+
+    console.log("Current user:", currentUser.id);
+
+    console.log("Trying to save:", {
+        displayName,
+        username,
+        bio
+    });
+
+
+
+    const { data, error } =
         await supabaseClient
         .from("profiles")
         .update({
 
-            display_name:name
+            display_name: displayName,
+            username: username,
+            bio: bio
 
         })
         .eq(
             "id",
             currentUser.id
-        );
+        )
+        .select();
+
+
+
+    console.log("Supabase response:", data);
+    console.log("Supabase error:", error);
 
 
 
@@ -552,20 +569,28 @@ async function saveDisplayName(){
     }
 
 
+    if(!data || data.length === 0){
 
-    alert("Display name updated! 🎉");
+        alert("Nothing updated 😭 Check your profile ID/RLS");
 
+        return;
+
+    }
+
+
+    alert("Profile updated! 🎉");
 
 }
 // =========================
-// SETTINGS - LOAD USER INFO
+// LOAD SETTINGS
 // =========================
 
 async function loadSettings(){
 
-    const { data, error } = await supabaseClient
+    const { data, error } =
+        await supabaseClient
         .from("profiles")
-        .select("*")
+        .select("display_name, username, bio")
         .eq("id", currentUser.id)
         .single();
 
@@ -586,116 +611,14 @@ async function loadSettings(){
         data.username || "";
 
 
+    document.getElementById("bioInput").value =
+        data.bio || "";
+
+
     document.getElementById("emailInput").value =
         currentUser.email || "";
 
 }
-
-
-
-// =========================
-// SAVE DISPLAY NAME
-// =========================
-
-async function saveDisplayName(){
-
-
-    let name =
-        document.getElementById("displayNameInput")
-        .value
-        .trim();
-
-
-    if(name === ""){
-
-        alert("Please enter a display name 💙");
-        return;
-
-    }
-
-
-
-    const { error } =
-        await supabaseClient
-        .from("profiles")
-        .update({
-
-            display_name:name
-
-        })
-        .eq(
-            "id",
-            currentUser.id
-        );
-
-
-
-    if(error){
-
-        alert(error.message);
-        return;
-
-    }
-
-
-    alert("Display name changed 🎉");
-
-}
-
-
-
-
-// =========================
-// SAVE USERNAME
-// =========================
-
-async function saveUsername(){
-
-
-    let username =
-        document.getElementById("usernameInput")
-        .value
-        .trim();
-
-
-
-    if(username === ""){
-
-        alert("Please enter a username 💙");
-        return;
-
-    }
-
-
-
-    const { error } =
-        await supabaseClient
-        .from("profiles")
-        .update({
-
-            username:username
-
-        })
-        .eq(
-            "id",
-            currentUser.id
-        );
-
-
-
-    if(error){
-
-        alert(error.message);
-        return;
-
-    }
-
-
-    alert("Username changed 🎉");
-
-}
-
-
 
 
 // =========================
@@ -704,13 +627,8 @@ async function saveUsername(){
 
 async function saveEmail(){
 
-
-    let email =
-        document.getElementById("emailInput")
-        .value
-        .trim();
-
-
+    const email =
+        document.getElementById("emailInput").value.trim();
 
     if(email === ""){
 
@@ -719,16 +637,12 @@ async function saveEmail(){
 
     }
 
-
-
     const { error } =
         await supabaseClient.auth.updateUser({
 
-            email:email
+            email: email
 
         });
-
-
 
     if(error){
 
@@ -737,7 +651,71 @@ async function saveEmail(){
 
     }
 
-
     alert("Check your email to confirm the change 📧");
+
+}
+
+
+
+// =========================
+// OPEN PROFILE
+// =========================
+
+async function openProfile(id){
+
+    const { data, error } =
+        await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+    if(error){
+
+        console.log(error);
+        alert("Couldn't load profile 💙");
+        return;
+
+    }
+
+    document.getElementById("profileName").textContent =
+        data.display_name || "Unknown User";
+
+    document.getElementById("profileUsername").textContent =
+        "@" + (data.username || "username");
+
+    document.getElementById("profileBio").textContent =
+        data.bio || "No bio yet 💙";
+
+    if(data.avatar_url){
+
+        document.getElementById("profileImage").src =
+            data.avatar_url;
+
+    }
+
+    else{
+
+        document.getElementById("profileImage").src =
+            "https://api.dicebear.com/9.x/initials/svg?seed=" +
+            encodeURIComponent(data.display_name || "User");
+
+    }
+
+    document.getElementById("profilePanel").style.display =
+        "flex";
+
+}
+
+
+
+// =========================
+// CLOSE PROFILE
+// =========================
+
+function closeProfile(){
+
+    document.getElementById("profilePanel").style.display =
+        "none";
 
 }

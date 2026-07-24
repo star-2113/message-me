@@ -27,13 +27,14 @@
 
 
     <!-- SIDEBAR -->
+
     <div class="sidebar">
 
 
         <input
-            id="searchFriends"
-            placeholder="🔍 Search friends..."
-            onkeyup="searchFriends()">
+        id="searchFriends"
+        placeholder="🔍 Search friends..."
+        onkeyup="searchFriends()">
 
 
 
@@ -41,8 +42,6 @@
 
 
         <div id="friendsList">
-
-            <!-- Friends appear here -->
 
         </div>
 
@@ -56,8 +55,8 @@
 
 
         <input
-            id="userSearch"
-            placeholder="Search username...">
+        id="userSearch"
+        placeholder="Search username...">
 
 
 
@@ -68,8 +67,6 @@
 
 
         <div id="searchResults">
-
-            <!-- Search results appear here -->
 
         </div>
 
@@ -82,7 +79,17 @@
         <div class="sidebar-bottom">
 
 
-            <div class="bottom-button" onclick="mode()">
+            <div class="bottom-button"
+            onclick="openProfile(currentUser.id)">
+
+                👤 Profile
+
+            </div>
+
+
+
+            <div class="bottom-button"
+            onclick="mode()">
 
                 🌙 Theme
 
@@ -98,9 +105,7 @@
             </div>
 
 
-
         </div>
-
 
 
     </div>
@@ -110,13 +115,13 @@
 
 
 
+
     <!-- CHAT AREA -->
+
 
     <div class="chat">
 
 
-
-        <!-- CHAT HEADER -->
 
         <div class="chat-header">
 
@@ -133,18 +138,22 @@
 
                 <div>
 
+
                     <h2 id="chatName">
+
                         Select a friend 💙
+
                     </h2>
 
 
                     <small>
+
                         Online
+
                     </small>
 
 
                 </div>
-
 
 
             </div>
@@ -154,7 +163,6 @@
             <div class="online-dot"></div>
 
 
-
         </div>
 
 
@@ -162,12 +170,9 @@
 
 
 
-
-        <!-- MESSAGES -->
 
         <div id="messages">
 
-            <!-- Messages appear here -->
 
         </div>
 
@@ -176,7 +181,6 @@
 
 
 
-        <!-- MESSAGE INPUT -->
 
         <div class="input-area">
 
@@ -195,14 +199,11 @@
             </button>
 
 
-
         </div>
 
 
 
-
     </div>
-
 
 
 
@@ -212,9 +213,85 @@
 
 
 
+
+
+<!-- PROFILE POPUP -->
+
+
+<div id="profilePanel" class="profile-panel">
+
+
+    <div class="profile-card">
+
+
+        <button 
+        class="close-profile"
+        onclick="closeProfile()">
+
+            ✖
+
+        </button>
+
+
+
+
+        <img
+        id="profileImage"
+        src="https://api.dicebear.com/9.x/initials/svg?seed=User"
+        class="profile-picture">
+
+
+
+        <h2 id="profileName">
+
+            Name
+
+        </h2>
+
+
+
+        <p id="profileUsername">
+
+            @username
+
+        </p>
+
+
+
+        <p id="profileBio">
+
+            No bio yet 💙
+
+        </p>
+
+
+
+        <button onclick="window.location.href='settings.html'">
+
+            ⚙️ Edit Profile
+
+        </button>
+
+
+
+    </div>
+
+
+</div>
+
+
+
+
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script src="supabase.js"></script>
+
 <script src="script.js"></script>
 
+
 </body>
+
 </html>

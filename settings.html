@@ -3,24 +3,20 @@
 
 <head>
 
-<title>Settings - Message Me</title>
+    <title>Settings - Message Me</title>
 
-<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
 
 </head>
 
-
 <body>
-
 
 <header class="settings-header">
 
-    <h1>
-        ⚙️ Settings
-    </h1>
+    <h1>⚙️ Settings</h1>
 
-
-    <button class="home-button"
+    <button
+    class="home-button"
     onclick="window.location.href='chat.html'">
 
         🏠 Home
@@ -31,84 +27,64 @@
 
 
 
-
-
 <div class="settings-container">
-
 
 
     <!-- ACCOUNT -->
 
     <div class="settings-card">
 
-
         <h2>👤 Account</h2>
 
 
-
-        <label>
-            Display Name
-        </label>
-
+        <label>Display Name</label>
 
         <input
         id="displayNameInput"
-        placeholder="Display name">
+        type="text"
+        placeholder="Display Name">
 
 
-
-        <button onclick="saveDisplayName()">
-            Save Display Name
-        </button>
-
-
-
-        <br><br>
-
-
-
-        <label>
-            Username
-        </label>
-
+        <label>Username</label>
 
         <input
         id="usernameInput"
+        type="text"
         placeholder="Username">
 
 
+        <label>Bio</label>
 
-        <button onclick="saveUsername()">
-            Save Username
-        </button>
-
-
-
-        <br><br>
+        <textarea
+        id="bioInput"
+        placeholder="Tell people a little about yourself..."></textarea>
 
 
-
-        <label>
-            Email
-        </label>
-
+        <label>Email</label>
 
         <input
         id="emailInput"
+        type="email"
         placeholder="Email">
 
 
+        <div style="margin-top:20px;">
 
-        <button onclick="saveEmail()">
-            Save Email
-        </button>
+            <button onclick="saveProfile()">
 
+                💾 Save Profile
 
+            </button>
+
+            <button onclick="saveEmail()">
+
+                📧 Change Email
+
+            </button>
+
+        </div>
 
     </div>
-
-
-
 
 
 
@@ -116,27 +92,17 @@
 
     <div class="settings-card">
 
-
         <h2>🎨 Appearance</h2>
 
-
-
-        <div class="setting-option"
+        <div
+        class="setting-option"
         onclick="mode()">
-
 
             🌙 Toggle Dark Mode
 
-
         </div>
 
-
     </div>
-
-
-
-
-
 
 
 
@@ -144,38 +110,21 @@
 
     <div class="settings-card">
 
-
         <h2>🔔 Notifications</h2>
 
-
-
         <div class="setting-option">
-
 
             💬 Message Notifications
 
-
         </div>
-
-
-
 
         <div class="setting-option">
 
-
             👥 Friend Request Notifications
-
 
         </div>
 
-
-
     </div>
-
-
-
-
-
 
 
 
@@ -183,60 +132,33 @@
 
     <div class="settings-card">
 
-
         <h2>🔒 Security</h2>
-
-
 
         <div class="setting-option">
 
-
             🔑 Change Password
-
 
         </div>
 
-
-
     </div>
 
 
 
-
-
-
-
-
-    <!-- DANGER -->
+    <!-- DANGER ZONE -->
 
     <div class="settings-card">
 
-
         <h2>⚠️ Danger Zone</h2>
-
-
 
         <button class="delete-btn">
 
-
             🗑 Delete Account
-
 
         </button>
 
-
-
     </div>
 
-
-
-
-
 </div>
-
-
-
-
 
 
 
@@ -246,19 +168,20 @@
 
 <script src="script.js"></script>
 
-
 <script>
 
-window.onload = function(){
+window.onload = async function(){
 
-    loadSettings();
+    const { data } =
+        await supabaseClient.auth.getUser();
+
+    currentUser = data.user;
+
+    await loadSettings();
 
 };
 
 </script>
-
-
-
 
 </body>
 
