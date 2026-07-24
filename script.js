@@ -85,15 +85,83 @@ async function sendMessage(){
 
 
     const { error } =
-        await supabaseClient
-        .from("messages")
-        .insert({
+await supabaseClient
+.from("messages")
+.insert({
 
-            sender: currentUser.id,
-            receiver: currentChat,
-            message: text
+    sender: currentUser.id,
+    receiver: currentChat,
+    message: text
 
-        });
+});
+
+
+if(error){
+
+    alert(error.message);
+    return;
+
+}
+async function loadNotifications(){
+
+    const { data, error } =
+    await supabaseClient
+    .from("notifications")
+    .select("*")
+    .eq("user_id", currentUser.id)
+    .eq("read", false);
+
+
+    if(error){
+
+        console.log(error);
+        return;
+
+    }
+
+
+    const friends =
+    document.querySelectorAll(".friend");
+
+
+    friends.forEach(friend=>{
+
+        const badge =
+        friend.querySelector(".notification");
+
+
+        if(badge){
+
+            if(data.length > 0){
+
+                badge.innerHTML = data.length;
+                badge.style.display = "flex";
+
+            }
+
+            else{
+
+                badge.style.display = "none";
+
+            }
+
+        }
+
+    });
+
+}
+
+// Create notification
+await supabaseClient
+.from("notifications")
+.insert({
+
+    user_id: currentChat,
+    sender_id: currentUser.id,
+    message: text,
+    read: false
+
+});
 
 
 
@@ -341,14 +409,22 @@ async function loadFriends(){
 
         div.innerHTML = `
 
-            <img
-            src="${friend.avatar_url || 
-'https://api.dicebear.com/9.x/initials/svg?seed=' + friend.display_name}"
-            class="avatar">
+    <img
+    src="${friend.avatar_url || 
+    'https://api.dicebear.com/9.x/initials/svg?seed=' + friend.display_name}"
+    class="avatar">
 
-            <span>${friend.display_name}</span>
 
-        `;
+    <span>
+        ${friend.display_name}
+    </span>
+
+
+    <span class="notification" style="display:none;">
+    0
+</span>
+
+`;
 
         div.onclick = () => {
 
@@ -361,7 +437,10 @@ async function loadFriends(){
 
         list.appendChild(div);
 
-    });
+});
+
+
+loadNotifications();
 
 }
 

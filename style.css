@@ -3,12 +3,11 @@
 }
 
 
-html, body {
+body.chat-page,
+body.settings-page {
 
-    margin:0;
     height:100%;
-    overflow:hidden;
-    font-family:Arial, sans-serif;
+    overflow:auto;
 
 }
 
@@ -571,5 +570,39 @@ body:not(.light) .settings-card textarea{
 body:not(.light) .settings-card textarea::placeholder{
 
     color:#aaa;
+
+}
+
+.settings-container {
+
+    padding-bottom:50px;
+
+}
+.friend {
+
+    display:flex;
+    align-items:center;
+
+}
+
+
+.friend .notification {
+
+    margin-left:auto;
+
+    background:#3B82F6;
+    color:white;
+
+    width:22px;
+    height:22px;
+
+    border-radius:50%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:12px;
+    font-weight:bold;
 
 }
