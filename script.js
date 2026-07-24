@@ -377,18 +377,22 @@ async function loadFriends(){
     const list =
         document.getElementById("friendsList");
 
-    // Stop if we're not on chat.html
+
     if(!list){
 
         return;
 
     }
 
+
+
     const { data, error } =
         await supabaseClient
         .from("profiles")
         .select("*")
         .neq("id", currentUser.id);
+
+
 
     if(error){
 
@@ -397,33 +401,63 @@ async function loadFriends(){
 
     }
 
+
+
     list.innerHTML = "";
 
-    data.forEach(friend => {
+
+
+    for(const friend of data){
+
+
+        const { data: notifications } =
+            await supabaseClient
+            .from("notifications")
+            .select("*")
+            .eq("user_id", currentUser.id)
+            .eq("sender_id", friend.id)
+            .eq("read", false);
+
+
+
+        const count =
+            notifications ? notifications.length : 0;
+
+
 
         const div =
             document.createElement("div");
 
+
+
         div.className = "friend";
+
+
 
         div.innerHTML = `
 
-    <img
-    src="${friend.avatar_url || 
-    'https://api.dicebear.com/9.x/initials/svg?seed=' + friend.display_name}"
-    class="avatar">
+            <img
+            src="${
+                friend.avatar_url ||
+                "https://api.dicebear.com/9.x/initials/svg?seed=" +
+                encodeURIComponent(friend.display_name)
+            }"
+            class="avatar">
 
 
-    <span>
-        ${friend.display_name}
-    </span>
+            <span>
+                ${friend.display_name}
+            </span>
 
 
-    <span class="notification" style="display:none;">
-    0
-</span>
+            <span class="notification"
+            ${count === 0 ? 'style="display:none;"' : ""}>
+                ${count}
+            </span>
 
-`;
+        `;
+
+
 
         div.onclick = () => {
 
@@ -434,12 +468,16 @@ async function loadFriends(){
 
         };
 
+
+
         list.appendChild(div);
 
-});
+
+    }
 
 
-loadNotifications();
+    console.log("Friends loaded with notifications ✅");
+
 
 }
 
@@ -452,11 +490,22 @@ loadNotifications();
 
 function searchFriends(){
 
+    const searchInput =
+        document.getElementById("searchFriends");
+
+
+    if(!searchInput){
+
+        return;
+
+    }
+
+
 
     const search =
-        document.getElementById("searchFriends")
-        .value
-        .toLowerCase();
+        searchInput.value
+        .toLowerCase()
+        .trim();
 
 
 
@@ -468,26 +517,34 @@ function searchFriends(){
     for(let friend of friends){
 
 
-        if(
+        const name =
             friend.innerText
-            .toLowerCase()
-            .includes(search)
-        ){
+            .toLowerCase();
 
-            friend.style.display="flex";
+
+
+        if(name.includes(search)){
+
+
+            friend.style.display = "flex";
+
 
         }
 
         else{
 
-            friend.style.display="none";
+
+            friend.style.display = "none";
+
 
         }
+
 
     }
 
 
 }
+
 
 
 
@@ -501,9 +558,6 @@ function mode(){
     document.body.classList.toggle("light");
 
 }
-
-
-
 // =========================
 // REALTIME
 // =========================
