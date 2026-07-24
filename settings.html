@@ -15,20 +15,14 @@
 
     <h1>⚙️ Settings</h1>
 
-    <button
-    class="home-button"
-    onclick="window.location.href='chat.html'">
-
+    <button class="home-button" onclick="window.location.href='chat.html'">
         🏠 Home
-
     </button>
 
 </header>
 
 
-
 <div class="settings-container">
-
 
     <!-- ACCOUNT -->
 
@@ -36,56 +30,74 @@
 
         <h2>👤 Account</h2>
 
-
         <label>Display Name</label>
 
         <input
-        id="displayNameInput"
-        type="text"
-        placeholder="Display Name">
-
+            type="text"
+            id="displayNameInput"
+            placeholder="Display Name">
 
         <label>Username</label>
 
         <input
-        id="usernameInput"
-        type="text"
-        placeholder="Username">
-
+            type="text"
+            id="usernameInput"
+            placeholder="Username">
 
         <label>Bio</label>
 
         <textarea
-        id="bioInput"
-        placeholder="Tell people a little about yourself..."></textarea>
+            id="bioInput"
+            placeholder="Tell people a little about yourself..."></textarea>
+
+
+        <label>Profile Picture</label>
+
+        <img
+            id="avatarPreview"
+            class="profile-picture"
+            src="https://api.dicebear.com/9.x/initials/svg?seed=User">
+
+        <input
+            type="file"
+            id="avatarInput"
+            accept="image/*">
+
+        <button
+            type="button"
+            onclick="uploadAvatar()">
+
+            📸 Upload Picture
+
+        </button>
 
 
         <label>Email</label>
 
         <input
-        id="emailInput"
-        type="email"
-        placeholder="Email">
+            type="email"
+            id="emailInput"
+            placeholder="Email">
 
+        <br><br>
 
-        <div style="margin-top:20px;">
+        <button
+            type="button"
+            onclick="saveProfile()">
 
-            <button onclick="saveProfile()">
+            💾 Save Profile
 
-                💾 Save Profile
+        </button>
 
-            </button>
+        <button
+            type="button"
+            onclick="saveEmail()">
 
-            <button onclick="saveEmail()">
+            📧 Change Email
 
-                📧 Change Email
-
-            </button>
-
-        </div>
+        </button>
 
     </div>
-
 
 
     <!-- APPEARANCE -->
@@ -94,16 +106,13 @@
 
         <h2>🎨 Appearance</h2>
 
-        <div
-        class="setting-option"
-        onclick="mode()">
+        <div class="setting-option" onclick="mode()">
 
             🌙 Toggle Dark Mode
 
         </div>
 
     </div>
-
 
 
     <!-- NOTIFICATIONS -->
@@ -127,7 +136,6 @@
     </div>
 
 
-
     <!-- SECURITY -->
 
     <div class="settings-card">
@@ -143,8 +151,7 @@
     </div>
 
 
-
-    <!-- DANGER ZONE -->
+    <!-- DANGER -->
 
     <div class="settings-card">
 
@@ -161,21 +168,15 @@
 </div>
 
 
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script src="supabase.js"></script>
-
 <script src="script.js"></script>
 
 <script>
 
 window.onload = async function(){
 
-    const { data } =
-        await supabaseClient.auth.getUser();
-
-    currentUser = data.user;
+    await loadUser();
 
     await loadSettings();
 
@@ -184,5 +185,4 @@ window.onload = async function(){
 </script>
 
 </body>
-
 </html>

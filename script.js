@@ -342,7 +342,8 @@ async function loadFriends(){
         div.innerHTML = `
 
             <img
-            src="https://api.dicebear.com/9.x/initials/svg?seed=${friend.display_name}"
+            src="${friend.avatar_url || 
+'https://api.dicebear.com/9.x/initials/svg?seed=' + friend.display_name}"
             class="avatar">
 
             <span>${friend.display_name}</span>
@@ -587,10 +588,12 @@ async function saveProfile(){
 
 async function loadSettings(){
 
+    console.log("Loading settings...");
+
     const { data, error } =
         await supabaseClient
         .from("profiles")
-        .select("display_name, username, bio")
+        .select("*")
         .eq("id", currentUser.id)
         .single();
 
@@ -601,6 +604,14 @@ async function loadSettings(){
         return;
 
     }
+
+
+    console.log("Display Name:", data.display_name);
+console.log("Username:", data.username);
+console.log("Bio:", data.bio);
+console.log("Avatar URL:", data.avatar_url);
+console.log(data);
+
 
 
     document.getElementById("displayNameInput").value =
@@ -618,6 +629,23 @@ async function loadSettings(){
     document.getElementById("emailInput").value =
         currentUser.email || "";
 
+
+
+   if(data.avatar_url){
+
+    document.getElementById("avatarPreview").src =
+        data.avatar_url;
+
+}
+else{
+
+    document.getElementById("avatarPreview").src =
+    "https://api.dicebear.com/9.x/initials/svg?seed=" 
+    + encodeURIComponent(data.display_name || "User");
+
+}
+
+
 }
 
 
@@ -625,57 +653,45 @@ async function loadSettings(){
 // SAVE EMAIL
 // =========================
 
-async function saveEmail(){
+async function saveEmail() {
 
-    const email =
-        document.getElementById("emailInput").value.trim();
+    const email = document.getElementById("emailInput").value.trim();
 
-    if(email === ""){
-
+    if (email === "") {
         alert("Please enter an email 💙");
         return;
-
     }
 
-    const { error } =
-        await supabaseClient.auth.updateUser({
+    const { error } = await supabaseClient.auth.updateUser({
+        email: email
+    });
 
-            email: email
-
-        });
-
-    if(error){
-
+    if (error) {
+        console.log(error);
         alert(error.message);
         return;
-
     }
 
-    alert("Check your email to confirm the change 📧");
-
+    alert("Check your email to confirm your new email 📧");
 }
-
 
 
 // =========================
 // OPEN PROFILE
 // =========================
 
-async function openProfile(id){
+async function openProfile(id) {
 
-    const { data, error } =
-        await supabaseClient
+    const { data, error } = await supabaseClient
         .from("profiles")
         .select("*")
         .eq("id", id)
         .single();
 
-    if(error){
-
+    if (error) {
         console.log(error);
         alert("Couldn't load profile 💙");
         return;
-
     }
 
     document.getElementById("profileName").textContent =
@@ -687,35 +703,104 @@ async function openProfile(id){
     document.getElementById("profileBio").textContent =
         data.bio || "No bio yet 💙";
 
-    if(data.avatar_url){
+    document.getElementById("profileImage").src =
+        data.avatar_url ||
+        "https://api.dicebear.com/9.x/initials/svg?seed=" +
+        encodeURIComponent(data.display_name || "User");
 
-        document.getElementById("profileImage").src =
-            data.avatar_url;
-
-    }
-
-    else{
-
-        document.getElementById("profileImage").src =
-            "https://api.dicebear.com/9.x/initials/svg?seed=" +
-            encodeURIComponent(data.display_name || "User");
-
-    }
-
-    document.getElementById("profilePanel").style.display =
-        "flex";
-
+    document.getElementById("profilePanel").style.display = "flex";
 }
 
 
-
 // =========================
-// CLOSE PROFILE
+// UPLOAD PROFILE PICTURE
 // =========================
 
-function closeProfile(){
+async function uploadAvatar(){
 
-    document.getElementById("profilePanel").style.display =
-        "none";
+    console.log("1. Starting upload");
+
+
+    const file =
+        document.getElementById("avatarInput").files[0];
+
+
+    console.log("2. File:", file);
+
+
+    if(!file){
+
+        alert("Choose a picture first 💙");
+        return;
+
+    }
+
+
+    const fileName = `${currentUser.id}/${file.name}`;
+
+
+    console.log("3. File path:", fileName);
+
+
+
+    const upload =
+        await supabaseClient
+        .storage
+        .from("avatars")
+        .upload(
+            fileName,
+            file,
+            {
+                upsert:true
+            }
+        );
+
+
+    console.log("4. Upload response:", upload);
+
+
+
+    if(upload.error){
+
+        alert(upload.error.message);
+        return;
+
+    }
+
+
+
+    const url =
+        supabaseClient
+        .storage
+        .from("avatars")
+        .getPublicUrl(fileName);
+
+
+
+    console.log("5. URL:", url.data.publicUrl);
+
+
+
+    const update =
+        await supabaseClient
+        .from("profiles")
+        .update({
+
+            avatar_url: url.data.publicUrl
+
+        })
+        .eq(
+            "id",
+            currentUser.id
+        )
+        .select();
+
+
+
+    console.log("6. Profile update:", update);
+
+
+
+    alert("Done 🎉");
 
 }
