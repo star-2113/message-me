@@ -58,7 +58,6 @@ function enterSend(event){
 
 async function sendMessage(){
 
-
     if(currentChat === ""){
 
         alert("Choose a friend first 💙");
@@ -75,7 +74,6 @@ async function sendMessage(){
         input.value.trim();
 
 
-
     if(text === ""){
 
         return;
@@ -84,7 +82,7 @@ async function sendMessage(){
 
 
 
-    // Send actual message
+    // Send message
 
     const { error } =
     await supabaseClient
@@ -114,14 +112,14 @@ async function sendMessage(){
     const { error: notificationError } =
     await supabaseClient
     .from("notifications")
-    .insert({
+.insert({
 
-        user_id: currentChat,
-        sender_id: currentUser.id,
-        messages: text,
-        read: false
+    user_id: currentChat,
+    sender_id: currentUser.id,
+    messages: text,
+    read: false
 
-    });
+});
 
 
 
@@ -141,13 +139,12 @@ async function sendMessage(){
 }
 
 
+
 // =========================
 // LOAD NOTIFICATIONS
 // =========================
 
 async function loadNotifications(){
-
-    console.log("Loading notifications...");
 
     const { data, error } =
     await supabaseClient
@@ -157,18 +154,23 @@ async function loadNotifications(){
     .eq("read", false);
 
 
+
     if(error){
 
-        console.log("Notification error:", error);
+        console.log(error);
         return;
 
     }
 
 
-    console.log("Notifications:", data);
-
+    console.log(
+        "Notifications:",
+        data
+    );
 
 }
+
+
 
 // =========================
 // MARK NOTIFICATIONS READ
@@ -176,23 +178,41 @@ async function loadNotifications(){
 
 async function markNotificationsRead(senderID){
 
-    const { error } =
+    console.log("Reading from:", senderID);
+
+
+    const { data, error } =
     await supabaseClient
     .from("notifications")
     .update({
         read:true
     })
-    .eq("user_id", currentUser.id)
-    .eq("sender_id", senderID);
+    .eq(
+        "user_id",
+        currentUser.id
+    )
+    .eq(
+        "sender_id",
+        senderID
+    )
+    .select();
+
+
+
+    console.log("READ RESULT:", data);
 
 
     if(error){
 
-        console.log("Read notification error:", error);
+        console.log(
+            "READ ERROR:",
+            error
+        );
 
     }
 
 }
+
 
 // =========================
 // OPEN CHAT
@@ -200,32 +220,106 @@ async function markNotificationsRead(senderID){
 
 async function openChat(id, name){
 
+    console.log("OPEN CHAT ID:", id);
+    console.log("OPEN CHAT NAME:", name);
+
+
     currentChat = id;
 
 
-    // Remember last person chatted with
-    localStorage.setItem(
-        "lastChat",
-        id
-    );
-
-
-    // Mark notifications as read
     await markNotificationsRead(id);
 
 
-
     document.getElementById("chatName").innerHTML =
-        name;
+    name;
 
 
-    document.getElementById("chatAvatar").src =
-        "https://api.dicebear.com/9.x/initials/svg?seed=" +
-        encodeURIComponent(name);
+    await loadMessages();
 
 
-    loadMessages();
+    await updateNotificationBadges();
 
+}
+
+
+
+// =========================
+// UPDATE NOTIFICATION NUMBERS
+// =========================
+
+async function updateNotificationBadges(){
+
+    const friends =
+    document.querySelectorAll(".friend");
+
+
+    for(const friend of friends){
+
+
+        const friendID =
+        friend.dataset.id;
+
+
+        const badge =
+        friend.querySelector(".notification");
+
+
+        if(!badge || !friendID){
+
+            continue;
+
+        }
+
+
+
+        const { data, error } =
+        await supabaseClient
+        .from("notifications")
+        .select("*")
+        .eq(
+            "user_id",
+            currentUser.id
+        )
+        .eq(
+            "sender_id",
+            friendID
+        )
+        .eq(
+            "read",
+            false
+        );
+
+
+
+        if(error){
+
+            console.log(error);
+            continue;
+
+        }
+
+
+
+        const count =
+        data.length;
+
+
+
+        if(count > 0){
+
+            badge.innerHTML = count;
+            badge.style.display = "flex";
+
+        }
+
+        else{
+
+            badge.style.display = "none";
+
+        }
+
+
+    }
 
 }
 
@@ -247,31 +341,31 @@ async function loadMessages(){
     .from("messages")
     .select("*")
     .or(
-        `and(sender.eq.${currentUser.id},receiver.eq.${currentChat}),and(sender.eq.${currentChat},receiver.eq.${currentUser.id})`
+    `and(sender.eq.${currentUser.id},receiver.eq.${currentChat}),and(sender.eq.${currentChat},receiver.eq.${currentUser.id})`
     )
-    .order("created_at", { ascending:true });
+    .order("created_at",{ascending:true});
+
 
 
     if(error){
 
-        console.log(error);
+        console.log(
+            "Load messages error:",
+            error
+        );
+
         return;
 
     }
+
 
 
     const box =
     document.getElementById("messages");
 
 
-    if(!box){
-
-        return;
-
-    }
-
-
     box.innerHTML = "";
+
 
 
     for(const msg of data){
@@ -281,112 +375,54 @@ async function loadMessages(){
     }
 
 
+
     box.scrollTop =
     box.scrollHeight;
 
 }
 
 // =========================
-// CREATE MESSAGE BUBBLE
+// CREATE MESSAGE
 // =========================
 
 async function createMessage(msg){
 
-
     const box =
-        document.getElementById("messages");
+    document.getElementById("messages");
 
 
-
-    const message =
-        document.createElement("div");
-
+    const div =
+    document.createElement("div");
 
 
     if(msg.sender === currentUser.id){
 
-        message.className =
-            "message my-message";
+        div.className =
+        "message my-message";
 
     }
 
     else{
 
-        message.className =
-            "message";
+        div.className =
+        "message";
 
     }
 
 
 
-    let name = "Friend";
+    div.innerHTML = `
 
-
-
-    if(msg.sender === currentUser.id){
-
-        name = "You";
-
-    }
-
-    else{
-
-
-        const {data:profile} =
-            await supabaseClient
-            .from("profiles")
-            .select("display_name")
-            .eq("id",msg.sender)
-            .single();
-
-
-
-        if(profile){
-
-            name = profile.display_name;
-
-        }
-
-    }
-
-
-
-    const time =
-        new Date(msg.created_at)
-        .toLocaleTimeString([],{
-
-            hour:"2-digit",
-            minute:"2-digit"
-
-        });
-
-
-
-    message.innerHTML = `
-
-        <div class="message-name">
-            ${name}
-        </div>
-
-        <div>
-            ${msg.message}
-        </div>
-
-        <small>
-            ${time}
-        </small>
+    <div>
+        ${msg.message}
+    </div>
 
     `;
 
 
-
-    box.appendChild(message);
-
+    box.appendChild(div);
 
 }
-
-
-
 
 // =========================
 // LOAD FRIENDS
@@ -394,8 +430,9 @@ async function createMessage(msg){
 
 async function loadFriends(){
 
+
     const list =
-        document.getElementById("friendsList");
+    document.getElementById("friendsList");
 
 
     if(!list){
@@ -406,11 +443,14 @@ async function loadFriends(){
 
 
 
-    const { data, error } =
-        await supabaseClient
-        .from("profiles")
-        .select("*")
-        .neq("id", currentUser.id);
+    const { data,error } =
+    await supabaseClient
+    .from("profiles")
+    .select("*")
+    .neq(
+        "id",
+        currentUser.id
+    );
 
 
 
@@ -423,63 +463,72 @@ async function loadFriends(){
 
 
 
-    list.innerHTML = "";
+    list.innerHTML="";
 
 
 
     for(const friend of data){
 
 
-        const { data: notifications } =
-            await supabaseClient
-            .from("notifications")
-            .select("*")
-            .eq("user_id", currentUser.id)
-            .eq("sender_id", friend.id)
-            .eq("read", false);
+        const { data:notifications } =
+        await supabaseClient
+        .from("notifications")
+        .select("*")
+        .eq(
+            "user_id",
+            currentUser.id
+        )
+        .eq(
+            "sender_id",
+            friend.id
+        )
+        .eq(
+            "read",
+            false
+        );
 
 
 
         const count =
-            notifications ? notifications.length : 0;
+        notifications?.length || 0;
 
 
 
         const div =
-            document.createElement("div");
+        document.createElement("div");
+
+
+        div.className="friend";
+div.dataset.id = friend.id;
 
 
 
-        div.className = "friend";
+        div.innerHTML=`
+
+        <img
+        class="avatar"
+        src="${
+        friend.avatar_url ||
+        "https://api.dicebear.com/9.x/initials/svg?seed=" +
+        encodeURIComponent(friend.display_name)
+        }">
 
 
-
-        div.innerHTML = `
-
-            <img
-            src="${
-                friend.avatar_url ||
-                "https://api.dicebear.com/9.x/initials/svg?seed=" +
-                encodeURIComponent(friend.display_name)
-            }"
-            class="avatar">
+        <span>
+        ${friend.display_name}
+        </span>
 
 
-            <span>
-                ${friend.display_name}
-            </span>
-
-
-            <span class="notification"
-            ${count === 0 ? 'style="display:none;"' : ""}>
-                ${count}
-            </span>
+        <span class="notification"
+        style="${count===0?"display:none;":""}">
+        ${count}
+        </span>
 
         `;
 
 
 
-        div.onclick = () => {
+        div.onclick=()=>{
 
             openChat(
                 friend.id,
@@ -496,11 +545,12 @@ async function loadFriends(){
     }
 
 
-    console.log("Friends loaded with notifications ✅");
+    console.log(
+        "Friends loaded ✅"
+    );
 
 
 }
-
 
 
 
