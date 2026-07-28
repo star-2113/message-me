@@ -147,31 +147,6 @@ async function sendMessage(){
 
 async function loadNotifications(){
 
-    const { data, error } =
-    await supabaseClient
-    .from("notifications")
-    .select("*")
-    .eq("user_id", currentUser.id)
-    .eq("read", false);
-
-    if(error){
-
-        console.log(error);
-        return;
-
-    }
-
-    console.log("Notifications:", data);
-
-}
-
-
-// =========================
-// LOAD NOTIFICATIONS
-// =========================
-
-async function loadNotifications(){
-
     console.log("Loading notifications...");
 
     const { data, error } =
@@ -196,21 +171,61 @@ async function loadNotifications(){
 }
 
 // =========================
+// MARK NOTIFICATIONS READ
+// =========================
+
+async function markNotificationsRead(senderID){
+
+    const { error } =
+    await supabaseClient
+    .from("notifications")
+    .update({
+        read:true
+    })
+    .eq("user_id", currentUser.id)
+    .eq("sender_id", senderID);
+
+
+    if(error){
+
+        console.log("Read notification error:", error);
+
+    }
+
+}
+
+// =========================
 // OPEN CHAT
 // =========================
 
-function openChat(id, name){
+async function openChat(id, name){
 
     currentChat = id;
 
+
+    // Remember last person chatted with
+    localStorage.setItem(
+        "lastChat",
+        id
+    );
+
+
+    // Mark notifications as read
+    await markNotificationsRead(id);
+
+
+
     document.getElementById("chatName").innerHTML =
         name;
+
 
     document.getElementById("chatAvatar").src =
         "https://api.dicebear.com/9.x/initials/svg?seed=" +
         encodeURIComponent(name);
 
+
     loadMessages();
+
 
 }
 
