@@ -84,25 +84,95 @@ async function sendMessage(){
 
 
 
+    // Send actual message
+
     const { error } =
-await supabaseClient
-.from("messages")
-.insert({
+    await supabaseClient
+    .from("messages")
+    .insert({
 
-    sender: currentUser.id,
-    receiver: currentChat,
-    message: text
+        sender: currentUser.id,
+        receiver: currentChat,
+        message: text
 
-});
+    });
 
 
-if(error){
 
-    alert(error.message);
-    return;
+    if(error){
+
+        console.log(error);
+        alert(error.message);
+        return;
+
+    }
+
+
+
+    // Create notification
+
+    const { error: notificationError } =
+    await supabaseClient
+    .from("notifications")
+    .insert({
+
+        user_id: currentChat,
+        sender_id: currentUser.id,
+        messages: text,
+        read: false
+
+    });
+
+
+
+    if(notificationError){
+
+        console.log(
+            "Notification error:",
+            notificationError
+        );
+
+    }
+
+
+
+    input.value = "";
 
 }
+
+
+// =========================
+// LOAD NOTIFICATIONS
+// =========================
+
 async function loadNotifications(){
+
+    const { data, error } =
+    await supabaseClient
+    .from("notifications")
+    .select("*")
+    .eq("user_id", currentUser.id)
+    .eq("read", false);
+
+    if(error){
+
+        console.log(error);
+        return;
+
+    }
+
+    console.log("Notifications:", data);
+
+}
+
+
+// =========================
+// LOAD NOTIFICATIONS
+// =========================
+
+async function loadNotifications(){
+
+    console.log("Loading notifications...");
 
     const { data, error } =
     await supabaseClient
@@ -114,104 +184,41 @@ async function loadNotifications(){
 
     if(error){
 
-        console.log(error);
+        console.log("Notification error:", error);
         return;
 
     }
 
 
-    const friends =
-    document.querySelectorAll(".friend");
+    console.log("Notifications:", data);
 
-
-    friends.forEach(friend=>{
-
-        const badge =
-        friend.querySelector(".notification");
-
-
-        if(badge){
-
-            if(data.length > 0){
-
-                badge.innerHTML = data.length;
-                badge.style.display = "flex";
-
-            }
-
-            else{
-
-                badge.style.display = "none";
-
-            }
-
-        }
-
-    });
 
 }
-
-// Create notification
-await supabaseClient
-.from("notifications")
-.insert({
-
-    user_id: currentChat,
-    sender_id: currentUser.id,
-    message: text,
-    read: false
-
-});
-
-
-
-    if(error){
-
-        alert(error.message);
-        return;
-
-    }
-
-
-    input.value = "";
-
-}
-
 
 // =========================
 // OPEN CHAT
 // =========================
 
-function openChat(id,name){
-
+function openChat(id, name){
 
     currentChat = id;
-
-
 
     document.getElementById("chatName").innerHTML =
         name;
 
-
-
     document.getElementById("chatAvatar").src =
-        "https://api.dicebear.com/9.x/initials/svg?seed=" + name;
-
-
+        "https://api.dicebear.com/9.x/initials/svg?seed=" +
+        encodeURIComponent(name);
 
     loadMessages();
 
-
 }
 
-
-
 // =========================
-// LOAD OLD MESSAGES
+// LOAD MESSAGES
 // =========================
 
 async function loadMessages(){
-
 
     if(currentChat === ""){
 
@@ -220,16 +227,14 @@ async function loadMessages(){
     }
 
 
-
-    const {data,error} =
-        await supabaseClient
-        .from("messages")
-        .select("*")
-        .or(
+    const { data, error } =
+    await supabaseClient
+    .from("messages")
+    .select("*")
+    .or(
         `and(sender.eq.${currentUser.id},receiver.eq.${currentChat}),and(sender.eq.${currentChat},receiver.eq.${currentUser.id})`
-        )
-        .order("created_at",{ascending:true});
-
+    )
+    .order("created_at", { ascending:true });
 
 
     if(error){
@@ -240,13 +245,18 @@ async function loadMessages(){
     }
 
 
-
     const box =
-        document.getElementById("messages");
+    document.getElementById("messages");
+
+
+    if(!box){
+
+        return;
+
+    }
 
 
     box.innerHTML = "";
-
 
 
     for(const msg of data){
@@ -256,15 +266,10 @@ async function loadMessages(){
     }
 
 
-
     box.scrollTop =
-        box.scrollHeight;
-
+    box.scrollHeight;
 
 }
-
-
-
 
 // =========================
 // CREATE MESSAGE BUBBLE
@@ -934,34 +939,5 @@ async function uploadAvatar(){
 
 
     alert("Done 🎉");
-
-}
-
-// =========================
-// LOAD NOTIFICATIONS
-// =========================
-
-async function loadNotifications(){
-
-    console.log("Loading notifications...");
-
-    const { data, error } =
-    await supabaseClient
-    .from("notifications")
-    .select("*")
-    .eq("user_id", currentUser.id)
-    .eq("read", false);
-
-
-    if(error){
-
-        console.log("Notification error:", error);
-        return;
-
-    }
-
-
-    console.log("Notifications:", data);
-
 
 }
