@@ -61,7 +61,9 @@
 
 
         <button onclick="searchUsers()">
+
             Search
+
         </button>
 
 
@@ -74,38 +76,33 @@
 
 
 
-        <!-- BOTTOM BUTTONS -->
+        <!-- SETTINGS BUTTON -->
 
         <div class="sidebar-bottom">
 
 
-            <div class="bottom-button"
-            onclick="openProfile(currentUser.id)">
+    <div class="bottom-button"
+    onclick="loadRequests()">
 
-                👤 Profile
+        📩 Friend Requests
 
-            </div>
-
-
-
-            <div class="bottom-button"
-            onclick="mode()">
-
-                🌙 Theme
-
-            </div>
+    </div>
 
 
+    <div id="friendRequests">
 
-            <div class="bottom-button"
-            onclick="window.location.href='settings.html'">
-
-                ⚙️ Settings
-
-            </div>
+    </div>
 
 
-        </div>
+    <div class="bottom-button"
+    onclick="window.location.href='settings.html'">
+
+        ⚙️ Settings
+
+    </div>
+
+
+</div>
 
 
     </div>
@@ -205,76 +202,6 @@
 
     </div>
 
-
-
-</div>
-
-
-
-
-
-
-
-<!-- PROFILE POPUP -->
-
-
-<div id="profilePanel" class="profile-panel">
-
-
-    <div class="profile-card">
-
-
-        <button 
-        class="close-profile"
-        onclick="closeProfile()">
-
-            ✖
-
-        </button>
-
-
-
-
-        <img
-        id="profileImage"
-        src="https://api.dicebear.com/9.x/initials/svg?seed=User"
-        class="profile-picture">
-
-
-
-        <h2 id="profileName">
-
-            Name
-
-        </h2>
-
-
-
-        <p id="profileUsername">
-
-            @username
-
-        </p>
-
-
-
-        <p id="profileBio">
-
-            No bio yet 💙
-
-        </p>
-
-
-
-        <button onclick="window.location.href='settings.html'">
-
-            ⚙️ Edit Profile
-
-        </button>
-
-
-
-    </div>
 
 
 </div>

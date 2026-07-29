@@ -1,11 +1,6 @@
 let currentUser = null;
 let currentChat = "";
 
-
-// =========================
-// LOAD USER
-// =========================
-
 // =========================
 // LOAD USER
 // =========================
@@ -27,10 +22,11 @@ async function loadUser(){
     // Only run these on chat.html
     if(document.getElementById("friendsList")){
 
-        loadFriends();
-        listenForMessages();
+    loadFriends();
+    loadRequests();
+    listenForMessages();
 
-    }
+}
 
 }
 
@@ -430,7 +426,6 @@ async function createMessage(msg){
 
 async function loadFriends(){
 
-
     const list =
     document.getElementById("friendsList");
 
@@ -442,16 +437,14 @@ async function loadFriends(){
     }
 
 
-
-    const { data,error } =
+    const {data,error} =
     await supabaseClient
-    .from("profiles")
+    .from("friends")
     .select("*")
-    .neq(
-        "id",
-        currentUser.id
+    .eq("status","accepted")
+    .or(
+        `user1.eq.${currentUser.id},user2.eq.${currentUser.id}`
     );
-
 
 
     if(error){
@@ -462,35 +455,44 @@ async function loadFriends(){
     }
 
 
-
-    list.innerHTML="";
-
+    list.innerHTML = "";
 
 
     for(const friend of data){
 
 
-        const { data:notifications } =
+        let friendID;
+
+
+        if(friend.user1 === currentUser.id){
+
+            friendID = friend.user2;
+
+        }
+
+        else{
+
+            friendID = friend.user1;
+
+        }
+
+
+
+        const {data:profile,error:profileError} =
         await supabaseClient
-        .from("notifications")
+        .from("profiles")
         .select("*")
-        .eq(
-            "user_id",
-            currentUser.id
-        )
-        .eq(
-            "sender_id",
-            friend.id
-        )
-        .eq(
-            "read",
-            false
-        );
+        .eq("id",friendID)
+        .single();
 
 
 
-        const count =
-        notifications?.length || 0;
+        if(profileError){
+
+            console.log(profileError);
+            continue;
+
+        }
 
 
 
@@ -499,40 +501,32 @@ async function loadFriends(){
 
 
         div.className="friend";
-div.dataset.id = friend.id;
 
 
-
-        div.innerHTML=`
+        div.innerHTML = `
 
         <img
         class="avatar"
         src="${
-        friend.avatar_url ||
-        "https://api.dicebear.com/9.x/initials/svg?seed=" +
-        encodeURIComponent(friend.display_name)
+        profile.avatar_url ||
+        "https://api.dicebear.com/9.x/initials/svg?seed=" 
+        + profile.display_name
         }">
 
 
         <span>
-        ${friend.display_name}
-        </span>
-
-
-        <span class="notification"
-        style="${count===0?"display:none;":""}">
-        ${count}
+        ${profile.display_name}
         </span>
 
         `;
 
 
 
-        div.onclick=()=>{
+        div.onclick = ()=>{
 
             openChat(
-                friend.id,
-                friend.display_name
+                profile.id,
+                profile.display_name
             );
 
         };
@@ -545,14 +539,303 @@ div.dataset.id = friend.id;
     }
 
 
-    console.log(
-        "Friends loaded ✅"
-    );
+    console.log("Friends loaded ✅");
 
 
 }
 
+// =========================
+// LOAD FRIEND REQUESTS
+// =========================
 
+async function loadRequests(){
+
+
+    const box =
+    document.getElementById("friendRequests");
+
+
+    if(!box){
+
+        console.log("No request box found");
+        return;
+
+    }
+
+
+
+    const {data,error} =
+    await supabaseClient
+    .from("friends")
+    .select("*")
+    .eq("user2", currentUser.id)
+    .eq("status","pending");
+
+
+
+    if(error){
+
+        console.log("Request loading error:", error);
+        return;
+
+    }
+
+
+
+    box.innerHTML = "";
+
+
+
+    if(data.length === 0){
+
+        box.innerHTML = `
+        
+        <p>
+        No friend requests 💙
+        </p>
+
+        `;
+
+        return;
+
+    }
+
+
+
+
+
+    for(const request of data){
+
+
+        const {data:profile,error:profileError} =
+        await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("id",request.user1)
+        .single();
+
+
+
+        if(profileError){
+
+            console.log(profileError);
+            continue;
+
+        }
+
+
+
+
+        const div =
+        document.createElement("div");
+
+
+        div.className = "request";
+
+
+
+        div.innerHTML = `
+
+        <p>
+        ${profile.display_name}
+        wants to be friends
+        </p>
+
+
+        <button onclick="acceptRequest('${request.id}')">
+
+            ✅ Accept
+
+        </button>
+
+
+        <button onclick="declineRequest('${request.id}')">
+
+            ❌ Decline
+
+        </button>
+
+        `;
+
+
+
+        box.appendChild(div);
+
+
+    }
+
+
+    console.log("Friend requests loaded ✅");
+
+
+}
+
+// =========================
+// ACCEPT FRIEND REQUEST
+// =========================
+
+async function acceptRequest(id){
+
+
+    const {error} =
+    await supabaseClient
+    .from("friends")
+    .update({
+
+        status:"accepted"
+
+    })
+    .eq("id",id);
+
+
+
+    if(error){
+
+        console.log(error);
+        return;
+
+    }
+
+
+    alert("Friend added 💙");
+
+
+    loadRequests();
+    loadFriends();
+
+
+}
+
+// =========================
+// DECLINE FRIEND REQUEST
+// =========================
+
+async function declineRequest(id){
+
+
+    const {error} =
+    await supabaseClient
+    .from("friends")
+    .delete()
+    .eq("id",id);
+
+
+
+    if(error){
+
+        console.log(error);
+        return;
+
+    }
+
+
+    loadRequests();
+
+
+}
+
+// =========================
+// SEARCH USERS
+// =========================
+
+async function searchUsers(){
+
+    const username =
+document.getElementById("userSearch")
+.value
+.trim();
+
+
+    if(username === ""){
+        return;
+    }
+
+
+    const {data,error} =
+    await supabaseClient
+    .from("profiles")
+    .select("*")
+    .ilike("username","%" + username + "%");
+
+
+    if(error){
+
+        console.log(error);
+        return;
+
+    }
+
+
+    const results =
+    document.getElementById("searchResults");
+
+
+    results.innerHTML="";
+
+
+    data.forEach(user=>{
+
+
+        if(user.id === currentUser.id){
+            return;
+        }
+
+
+        const div =
+        document.createElement("div");
+
+
+        div.innerHTML = `
+
+        <span>
+        ${user.username}
+        </span>
+
+        <button onclick="sendFriendRequest('${user.id}')">
+        ➕ Add Friend
+        </button>
+
+        `;
+
+
+        results.appendChild(div);
+
+
+    });
+
+
+}
+
+// =========================
+// SEND FRIEND REQUEST
+// =========================
+
+async function sendFriendRequest(friendID){
+
+    const {error} =
+    await supabaseClient
+    .from("friends")
+    .insert({
+
+        user1: currentUser.id,
+        user2: friendID,
+        status:"pending"
+
+    });
+
+
+    if(error){
+
+        console.log(error);
+        alert(error.message);
+        return;
+
+    }
+
+
+    alert("Friend request sent 💙");
+
+}
 
 // =========================
 // SEARCH FRIENDS
@@ -1004,5 +1287,15 @@ async function uploadAvatar(){
 
 
     alert("Done 🎉");
+
+}
+
+// =========================
+// CLOSE PROFILE
+// =========================
+
+function closeProfile(){
+
+    document.getElementById("profilePanel").style.display = "none";
 
 }
